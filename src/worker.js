@@ -223,7 +223,7 @@ const HTML = `<!DOCTYPE html>
     border-bottom: 1px solid var(--border);
   }
   .ds-num  { font-size: 11px; font-weight: 600; color: var(--text-3); letter-spacing: .8px; text-transform: uppercase; }
-  .ds-name { font-family: 'Instrument Serif', serif; font-size: 22px; font-weight: 400; font-style: italic; color: var(--text); flex: 1; line-height: 1.2; }
+  .ds-name { font-family: 'Inter', sans-serif; font-size: 15px; font-weight: 700; color: var(--text); flex: 1; line-height: 1.3; }
   .ds-progress {
     font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 20px;
     background: var(--surface-2); color: var(--text-3);
