@@ -3,330 +3,431 @@ const HTML = `<!DOCTYPE html>
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Agent Loop Lab</title>
+<title>Agent Loop Lab · Claude Code</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
+  :root {
+    --bg:        #F5F0E8;
+    --surface:   #FDFCFA;
+    --surface-2: #F9F6F1;
+    --border:    #E2D8CC;
+    --border-2:  #CEC4B8;
+    --text:      #1A1714;
+    --text-2:    #6B6259;
+    --text-3:    #A09890;
+    --accent:    #CC785C;
+    --accent-bg: #F8EEE9;
+    --dark:      #1A1714;
+    --shadow:    0 2px 8px rgba(26,23,20,.08), 0 1px 3px rgba(26,23,20,.04);
+    --shadow-lg: 0 8px 32px rgba(26,23,20,.1), 0 2px 8px rgba(26,23,20,.06);
+    --radius:    12px;
+    --radius-sm: 8px;
+  }
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
   body {
+    font-family: 'Inter', -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--text);
     min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: flex-start;
-    background: #f7f6f3;
-    font-family: 'Inter', system-ui, sans-serif;
-    padding: 48px 24px 64px;
-    color: #1a1a1a;
+    padding: 56px 24px 72px;
   }
 
   /* ── Header ── */
-  .badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    background: #fff3e0;
-    border: 1px solid #ffc46b;
-    color: #b05a00;
-    font-size: 0.72rem;
+  .brand {
+    font-size: 11px;
     font-weight: 600;
-    letter-spacing: 0.08em;
+    letter-spacing: 1.4px;
     text-transform: uppercase;
-    border-radius: 20px;
-    padding: 4px 12px;
-    margin-bottom: 18px;
+    color: var(--accent);
+    margin-bottom: 20px;
   }
 
   h1 {
-    font-size: 1.7rem;
-    font-weight: 700;
-    color: #111;
+    font-family: 'Instrument Serif', Georgia, serif;
+    font-size: 2.6rem;
+    font-weight: 400;
+    font-style: italic;
+    color: var(--text);
     text-align: center;
-    line-height: 1.3;
-    max-width: 540px;
-    margin-bottom: 8px;
+    line-height: 1.2;
+    letter-spacing: -.3px;
+    max-width: 600px;
+    margin-bottom: 12px;
   }
 
   .subtitle {
-    font-size: 0.88rem;
-    color: #666;
+    font-size: 14px;
+    color: var(--text-2);
     text-align: center;
+    line-height: 1.6;
     margin-bottom: 48px;
+    max-width: 480px;
   }
 
-  /* ── Diagram ── */
-  .diagram-wrap {
-    background: #fff;
-    border: 1px solid #e8e4de;
-    border-radius: 24px;
-    padding: 40px 48px;
-    box-shadow: 0 4px 24px rgba(0,0,0,0.06);
-    display: flex;
-    align-items: center;
-    gap: 0;
-    margin-bottom: 40px;
+  /* ── Diagram card ── */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    box-shadow: var(--shadow-lg);
+    padding: 44px 52px;
+    margin-bottom: 16px;
+    width: 100%;
+    max-width: 760px;
   }
 
-  /* SVG diagram */
-  .diagram-svg {
-    display: block;
+  /* ── Loop container ── */
+  .loop-wrap {
+    position: relative;
+    width: 340px;
+    height: 212px;
+    flex-shrink: 0;
+  }
+
+  .loop-label {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: .16em;
+    color: var(--text-3);
+    text-transform: uppercase;
+    white-space: nowrap;
+    pointer-events: none;
+    user-select: none;
+  }
+
+  .arrows {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
     overflow: visible;
   }
 
-  /* ── Requirements ── */
-  .reqs {
-    width: 100%;
-    max-width: 620px;
+  /* ── Node boxes (HTML, flexbox — no SVG text issues) ── */
+  .node {
+    position: absolute;
+    width: 130px;
+    height: 76px;
+    border-radius: 10px;
+    background: var(--surface);
+    border: 1px solid var(--border-2);
+    box-shadow: var(--shadow);
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    color: var(--text);
+  }
+
+  .node-message { top: 0;     left: 0;   }
+  .node-response { top: 0;     left: 210px; background: #FDF7F5; border-color: #D8C4BF; }
+  .node-llm      { top: 136px; left: 0;   }
+  .node-tools    { top: 136px; left: 210px; }
+
+  .nt { font-size: 12.5px; font-weight: 600; line-height: 1; color: var(--text); }
+  .ns { font-size: 10px;   font-weight: 400; line-height: 1; color: var(--text-3); }
+
+  /* ── Connector SVG ── */
+  .connector { flex-shrink: 0; }
+
+  /* ── Context box ── */
+  .ctx-wrap {
+    background: var(--surface-2);
+    border: 1px solid var(--border-2);
+    border-radius: 12px;
+    padding: 18px 18px 14px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    flex-shrink: 0;
+    box-shadow: var(--shadow);
+    min-width: 148px;
+  }
+
+  .ctx-title {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text-2);
+    letter-spacing: .06em;
+    text-transform: uppercase;
+  }
+
+  .ctx-nodes { display: flex; gap: 8px; }
+
+  .ctx-node {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 9px;
+    padding: 9px 10px 7px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+    min-width: 58px;
+    box-shadow: var(--shadow);
+  }
+
+  .ctx-node span {
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--text-2);
+    line-height: 1;
+    white-space: nowrap;
+  }
+
+  .ctx-badge {
+    background: var(--accent-bg);
+    border: 1px solid rgba(204,120,92,.2);
+    border-radius: 20px;
+    padding: 2px 10px;
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--accent);
+    letter-spacing: .04em;
+  }
+
+  /* ── Diagram flex layout ── */
+  .diagram-inner {
+    display: flex;
+    align-items: center;
+    gap: 0;
+  }
+
+  /* ── Requirements ── */
+  .reqs-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    box-shadow: var(--shadow);
+    width: 100%;
+    max-width: 760px;
+    overflow: hidden;
+  }
+
+  .sec-header {
+    padding: 14px 24px 12px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .sec-header-label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: var(--text-3);
   }
 
   .req-row {
     display: flex;
     align-items: flex-start;
-    gap: 12px;
-    background: #fff;
-    border: 1px solid #e8e4de;
-    border-radius: 12px;
-    padding: 14px 18px;
-    font-size: 0.875rem;
-    line-height: 1.5;
+    gap: 14px;
+    padding: 16px 24px;
+    border-bottom: 1px solid var(--border);
+    font-size: 14px;
+    line-height: 1.6;
   }
+
+  .req-row:last-child { border-bottom: none; }
 
   .req-row.bonus {
-    border-color: #c9b8f0;
-    background: #faf7ff;
+    background: var(--surface-2);
+    align-items: center;
+    padding: 12px 24px;
   }
 
-  .req-icon {
-    font-size: 1.1rem;
-    flex-shrink: 0;
-    margin-top: 1px;
-  }
+  .req-icon { font-size: 1rem; flex-shrink: 0; margin-top: 2px; }
+  .req-row.bonus .req-icon { margin-top: 0; }
 
-  .req-text strong {
-    display: block;
-    font-weight: 600;
-    margin-bottom: 2px;
-    color: #111;
-  }
+  .req-text strong { font-weight: 600; color: var(--text); display: block; margin-bottom: 2px; }
+  .req-text p { font-size: 13px; color: var(--text-2); }
 
-  .req-text span {
-    color: #555;
-  }
-
-  .section-label {
-    font-size: 0.72rem;
-    font-weight: 600;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: #999;
-    margin: 20px 0 8px;
+  .bonus-sec-header {
+    padding: 12px 24px 10px;
+    border-bottom: 1px solid var(--border);
+    border-top: 1px solid var(--border);
+    background: var(--bg);
   }
 </style>
 </head>
 <body>
 
-<div class="badge">
-  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
-  动手实践题
-</div>
+<p class="brand">Claude Code · 动手实践题</p>
 
-<h1>使用 Claude Code 写一个<br>能用的最小 Agent Loop</h1>
-<p class="subtitle">实现下图所示的循环，让 LLM 能够调用工具并持续推理直到任务完成</p>
+<h1>写一个能用的最小 Agent Loop</h1>
+<p class="subtitle">实现下图所示的循环，让 LLM 能够调用工具并持续推理，直到任务完成</p>
 
-<!-- Diagram -->
-<div class="diagram-wrap">
-  <svg class="diagram-svg" width="600" height="280" viewBox="0 0 600 280">
-    <defs>
-      <!-- Arrow markers -->
-      <marker id="arr-orange" markerWidth="9" markerHeight="9" refX="7" refY="3.5" orient="auto">
-        <path d="M0,0.5 L0,6.5 L8,3.5 Z" fill="#d97706"/>
-      </marker>
-      <marker id="arr-purple" markerWidth="9" markerHeight="9" refX="7" refY="3.5" orient="auto">
-        <path d="M0,0.5 L0,6.5 L8,3.5 Z" fill="#7c3aed"/>
-      </marker>
-      <marker id="arr-purple-rev" markerWidth="9" markerHeight="9" refX="1" refY="3.5" orient="auto">
-        <path d="M8,0.5 L8,6.5 L0,3.5 Z" fill="#7c3aed"/>
-      </marker>
+<!-- Diagram card -->
+<div class="card">
+  <div class="diagram-inner">
 
-      <!-- drop shadow -->
-      <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
-        <feDropShadow dx="0" dy="2" stdDeviation="4" flood-color="#00000014"/>
-      </filter>
-    </defs>
+    <!-- Loop area -->
+    <div class="loop-wrap">
+      <span class="loop-label">Agent Loop</span>
 
-    <!-- ───────── Loop area label ───────── -->
-    <text x="178" y="148" text-anchor="middle" font-size="11" font-weight="600"
-          fill="#d97706" letter-spacing="2" opacity="0.55">AGENT LOOP</text>
+      <!-- Arrows only in SVG — no icon/text positioning -->
+      <svg class="arrows" viewBox="0 0 340 212">
+        <defs>
+          <marker id="ao" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+            <path d="M0,0.5 L0,5.5 L7,3 Z" fill="#CC785C"/>
+          </marker>
+        </defs>
+        <!-- Message ↓ LLM -->
+        <line x1="65"  y1="77"  x2="65"  y2="135" stroke="#CC785C" stroke-width="1.8" marker-end="url(#ao)"/>
+        <!-- LLM → Tools -->
+        <line x1="131" y1="174" x2="209" y2="174" stroke="#CC785C" stroke-width="1.8" marker-end="url(#ao)"/>
+        <!-- Tools ↑ Response -->
+        <line x1="275" y1="135" x2="275" y2="77"  stroke="#CC785C" stroke-width="1.8" marker-end="url(#ao)"/>
+        <!-- Response ← Message -->
+        <line x1="209" y1="38"  x2="131" y2="38"  stroke="#CC785C" stroke-width="1.8" marker-end="url(#ao)"/>
+      </svg>
 
-    <!-- ───────── Node boxes ───────── -->
-    <!-- Message (top-left): center 88, 60 -->
-    <rect x="28" y="30" width="120" height="60" rx="12" fill="#fff7ed" stroke="#fbbf24" stroke-width="1.5" filter="url(#shadow)"/>
-    <!-- Message icon: chat bubble -->
-    <g transform="translate(55, 49)">
-      <rect x="0" y="0" width="22" height="17" rx="4" fill="#d97706" opacity="0.85"/>
-      <polygon points="4,17 4,22 10,17" fill="#d97706" opacity="0.85"/>
-      <line x1="5" y1="6" x2="17" y2="6" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
-      <line x1="5" y1="10" x2="14" y2="10" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
-    </g>
-    <text x="88" y="76" text-anchor="middle" font-size="12.5" font-weight="600" fill="#92400e">Message</text>
+      <!-- Message -->
+      <div class="node node-message">
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+          <rect x="1" y="1" width="18" height="14" rx="3.5" fill="#CC785C" opacity="0.9"/>
+          <polygon points="3,15 3,19 8,15" fill="#CC785C" opacity="0.9"/>
+          <line x1="4.5" y1="6"  x2="15.5" y2="6"  stroke="white" stroke-width="1.4" stroke-linecap="round"/>
+          <line x1="4.5" y1="9.5" x2="12"   y2="9.5" stroke="white" stroke-width="1.4" stroke-linecap="round"/>
+        </svg>
+        <span class="nt">Message</span>
+      </div>
 
-    <!-- Response (top-right): center 370, 60 -->
-    <rect x="310" y="30" width="120" height="60" rx="12" fill="#fff1f5" stroke="#f9a8d4" stroke-width="1.5" filter="url(#shadow)"/>
-    <!-- Response icon: reply bubble -->
-    <g transform="translate(337, 49)">
-      <rect x="0" y="0" width="22" height="17" rx="4" fill="#db2777" opacity="0.75"/>
-      <polygon points="18,17 18,22 12,17" fill="#db2777" opacity="0.75"/>
-      <circle cx="7" cy="8.5" r="1.8" fill="white"/>
-      <circle cx="11" cy="8.5" r="1.8" fill="white"/>
-      <circle cx="15" cy="8.5" r="1.8" fill="white"/>
-    </g>
-    <text x="370" y="76" text-anchor="middle" font-size="12.5" font-weight="600" fill="#9d174d">Response</text>
+      <!-- Response -->
+      <div class="node node-response">
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+          <rect x="1" y="1" width="18" height="14" rx="3.5" fill="#A06050" opacity="0.8"/>
+          <polygon points="17,15 17,19 12,15" fill="#A06050" opacity="0.8"/>
+          <circle cx="6.5"  cy="8" r="1.7" fill="white"/>
+          <circle cx="10"   cy="8" r="1.7" fill="white"/>
+          <circle cx="13.5" cy="8" r="1.7" fill="white"/>
+        </svg>
+        <span class="nt">Response</span>
+      </div>
 
-    <!-- LLM (bottom-left): center 88, 210 -->
-    <rect x="28" y="180" width="120" height="70" rx="12" fill="#fff7ed" stroke="#fbbf24" stroke-width="1.5" filter="url(#shadow)"/>
-    <!-- Robot icon -->
-    <g transform="translate(58, 190)">
-      <rect x="2" y="5" width="18" height="14" rx="3" fill="#d97706" opacity="0.85"/>
-      <rect x="7" y="0" width="8" height="6" rx="2" fill="#d97706" opacity="0.85"/>
-      <line x1="11" y1="5" x2="11" y2="6" stroke="#d97706" stroke-width="1.5"/>
-      <circle cx="8" cy="11" r="2" fill="white"/>
-      <circle cx="14" cy="11" r="2" fill="white"/>
-      <line x1="8" y1="16" x2="14" y2="16" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
-    </g>
-    <text x="88" y="228" text-anchor="middle" font-size="12.5" font-weight="600" fill="#92400e">LLM</text>
-    <text x="88" y="243" text-anchor="middle" font-size="10" font-weight="500" fill="#b45309" opacity="0.7">(claude / gpt / ...)</text>
+      <!-- LLM -->
+      <div class="node node-llm">
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+          <rect x="2" y="7" width="16" height="11" rx="2.5" fill="#CC785C" opacity="0.9"/>
+          <rect x="7" y="2" width="6"  height="6"  rx="2"   fill="#CC785C" opacity="0.9"/>
+          <circle cx="7.5"  cy="12.5" r="2" fill="white"/>
+          <circle cx="12.5" cy="12.5" r="2" fill="white"/>
+          <line x1="7.5" y1="16" x2="12.5" y2="16" stroke="white" stroke-width="1.4" stroke-linecap="round"/>
+        </svg>
+        <span class="nt">LLM</span>
+        <span class="ns">claude / gpt / …</span>
+      </div>
 
-    <!-- Tools (bottom-right): center 370, 210 -->
-    <rect x="310" y="180" width="120" height="70" rx="12" fill="#fff7ed" stroke="#fbbf24" stroke-width="1.5" filter="url(#shadow)"/>
-    <!-- Terminal icon -->
-    <g transform="translate(338, 191)">
-      <rect x="0" y="0" width="24" height="18" rx="3" fill="#d97706" opacity="0.85"/>
-      <polyline points="4,6 9,10 4,14" fill="none" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-      <line x1="12" y1="14" x2="20" y2="14" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
-    </g>
-    <text x="370" y="228" text-anchor="middle" font-size="12.5" font-weight="600" fill="#92400e">Tools</text>
-    <text x="370" y="243" text-anchor="middle" font-size="10" font-weight="500" fill="#b45309" opacity="0.7">Bash / Shell</text>
+      <!-- Tools -->
+      <div class="node node-tools">
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+          <rect x="1" y="1" width="18" height="18" rx="4" fill="#CC785C" opacity="0.9"/>
+          <polyline points="4,7 8.5,10 4,13" stroke="white" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+          <line x1="11" y1="13" x2="16" y2="13" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+        <span class="nt">Tools</span>
+        <span class="ns">Bash / Shell</span>
+      </div>
+    </div>
 
-    <!-- ───────── Arrows (clean rectangular loop) ───────── -->
-    <!-- ↓ Message → LLM (left side, going down) -->
-    <line x1="88" y1="91" x2="88" y2="178"
-          stroke="#d97706" stroke-width="2" marker-end="url(#arr-orange)"/>
+    <!-- Connector -->
+    <svg class="connector" width="52" height="212" viewBox="0 0 52 212">
+      <defs>
+        <marker id="ap"   markerWidth="7" markerHeight="7" refX="5.5" refY="3" orient="auto">
+          <path d="M0,0.5 L0,5.5 L6,3 Z" fill="#A09890"/>
+        </marker>
+        <marker id="ap-r" markerWidth="7" markerHeight="7" refX="0.5" refY="3" orient="auto">
+          <path d="M6,0.5 L6,5.5 L0,3 Z" fill="#A09890"/>
+        </marker>
+      </defs>
+      <line x1="6" y1="106" x2="46" y2="106"
+            stroke="#A09890" stroke-width="1.8" stroke-dasharray="4,3"
+            marker-start="url(#ap-r)" marker-end="url(#ap)"/>
+    </svg>
 
-    <!-- → LLM → Tools (bottom, going right) -->
-    <line x1="149" y1="218" x2="308" y2="218"
-          stroke="#d97706" stroke-width="2" marker-end="url(#arr-orange)"/>
+    <!-- Context -->
+    <div class="ctx-wrap">
+      <span class="ctx-title">Context</span>
+      <div class="ctx-nodes">
 
-    <!-- ↑ Tools → Response (right side, going up) -->
-    <line x1="370" y1="178" x2="370" y2="91"
-          stroke="#d97706" stroke-width="2" marker-end="url(#arr-orange)"/>
+        <div class="ctx-node">
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+            <ellipse cx="9" cy="9" rx="7" ry="6.5" fill="#6B6259" opacity="0.7"/>
+            <line x1="9" y1="2.5" x2="9" y2="15.5" stroke="white" stroke-width="1.1"/>
+            <path d="M3.5,6.5 Q9,4.5 14.5,6.5"  stroke="white" stroke-width="0.9" fill="none" opacity="0.6"/>
+            <path d="M2,9 Q9,7 16,9"             stroke="white" stroke-width="0.9" fill="none" opacity="0.6"/>
+            <path d="M3.5,11.5 Q9,9.5 14.5,11.5" stroke="white" stroke-width="0.9" fill="none" opacity="0.6"/>
+          </svg>
+          <span>Memory</span>
+        </div>
 
-    <!-- ← Response → Message (top, going left) -->
-    <line x1="308" y1="60" x2="150" y2="60"
-          stroke="#d97706" stroke-width="2" marker-end="url(#arr-orange)"/>
+        <div class="ctx-node">
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+            <circle cx="9" cy="9" r="3" stroke="#6B6259" stroke-width="1.6" opacity="0.8"/>
+            <line x1="9" y1="1"  x2="9"  y2="4"  stroke="#6B6259" stroke-width="1.6" stroke-linecap="round" opacity="0.8"/>
+            <line x1="9" y1="14" x2="9"  y2="17" stroke="#6B6259" stroke-width="1.6" stroke-linecap="round" opacity="0.8"/>
+            <line x1="1" y1="9"  x2="4"  y2="9"  stroke="#6B6259" stroke-width="1.6" stroke-linecap="round" opacity="0.8"/>
+            <line x1="14" y1="9" x2="17" y2="9"  stroke="#6B6259" stroke-width="1.6" stroke-linecap="round" opacity="0.8"/>
+            <line x1="2.8" y1="2.8" x2="4.9" y2="4.9" stroke="#6B6259" stroke-width="1.4" stroke-linecap="round" opacity="0.7"/>
+            <line x1="13.1" y1="13.1" x2="15.2" y2="15.2" stroke="#6B6259" stroke-width="1.4" stroke-linecap="round" opacity="0.7"/>
+            <line x1="2.8" y1="15.2" x2="4.9" y2="13.1" stroke="#6B6259" stroke-width="1.4" stroke-linecap="round" opacity="0.7"/>
+            <line x1="13.1" y1="4.9" x2="15.2" y2="2.8" stroke="#6B6259" stroke-width="1.4" stroke-linecap="round" opacity="0.7"/>
+          </svg>
+          <span>Skills</span>
+        </div>
 
-    <!-- ───────── Context box (right) ───────── -->
-    <rect x="468" y="60" width="120" height="160" rx="16"
-          fill="#f5f0ff" stroke="#a78bfa" stroke-width="1.5" filter="url(#shadow)"/>
-    <text x="528" y="84" text-anchor="middle" font-size="11.5" font-weight="700" fill="#6d28d9">Context</text>
+      </div>
+      <span class="ctx-badge">加分项</span>
+    </div>
 
-    <!-- Memory sub-box -->
-    <rect x="480" y="94" width="44" height="48" rx="10" fill="#ede9fe" stroke="#c4b5fd" stroke-width="1.2"/>
-    <!-- Brain icon (simplified) -->
-    <g transform="translate(491, 101)">
-      <ellipse cx="11" cy="9" rx="9" ry="8" fill="#7c3aed" opacity="0.7"/>
-      <line x1="11" y1="1" x2="11" y2="17" stroke="white" stroke-width="1.2"/>
-      <line x1="6" y1="5" x2="16" y2="5" stroke="white" stroke-width="1" opacity="0.6"/>
-      <line x1="4" y1="9" x2="18" y2="9" stroke="white" stroke-width="1" opacity="0.6"/>
-      <line x1="6" y1="13" x2="16" y2="13" stroke="white" stroke-width="1" opacity="0.6"/>
-    </g>
-    <text x="502" y="152" text-anchor="middle" font-size="9.5" font-weight="600" fill="#5b21b6">Memory</text>
-
-    <!-- Skills sub-box -->
-    <rect x="532" y="94" width="44" height="48" rx="10" fill="#ede9fe" stroke="#c4b5fd" stroke-width="1.2"/>
-    <!-- Gear icon -->
-    <g transform="translate(543, 101)">
-      <circle cx="11" cy="9" r="4" fill="none" stroke="#7c3aed" stroke-width="1.8" opacity="0.85"/>
-      <circle cx="11" cy="9" r="1.5" fill="#7c3aed" opacity="0.85"/>
-      <line x1="11" y1="1" x2="11" y2="4" stroke="#7c3aed" stroke-width="1.8" stroke-linecap="round" opacity="0.85"/>
-      <line x1="11" y1="14" x2="11" y2="17" stroke="#7c3aed" stroke-width="1.8" stroke-linecap="round" opacity="0.85"/>
-      <line x1="3" y1="9" x2="6" y2="9" stroke="#7c3aed" stroke-width="1.8" stroke-linecap="round" opacity="0.85"/>
-      <line x1="16" y1="9" x2="19" y2="9" stroke="#7c3aed" stroke-width="1.8" stroke-linecap="round" opacity="0.85"/>
-      <line x1="5.1" y1="4.1" x2="7.2" y2="6.2" stroke="#7c3aed" stroke-width="1.5" stroke-linecap="round" opacity="0.85"/>
-      <line x1="14.8" y1="11.8" x2="16.9" y2="13.9" stroke="#7c3aed" stroke-width="1.5" stroke-linecap="round" opacity="0.85"/>
-      <line x1="5.1" y1="13.9" x2="7.2" y2="11.8" stroke="#7c3aed" stroke-width="1.5" stroke-linecap="round" opacity="0.85"/>
-      <line x1="14.8" y1="6.2" x2="16.9" y2="4.1" stroke="#7c3aed" stroke-width="1.5" stroke-linecap="round" opacity="0.85"/>
-    </g>
-    <text x="554" y="152" text-anchor="middle" font-size="9.5" font-weight="600" fill="#5b21b6">Skills</text>
-
-    <!-- Context bonus label -->
-    <rect x="488" y="158" width="80" height="20" rx="6" fill="#ddd6fe" stroke="none"/>
-    <text x="528" y="171" text-anchor="middle" font-size="9" font-weight="600" fill="#5b21b6" letter-spacing="0.5">加分项</text>
-
-    <!-- ── Double arrow: loop ↔ context ── -->
-    <line x1="432" y1="148" x2="466" y2="148"
-          stroke="#7c3aed" stroke-width="2" stroke-dasharray="4,3"
-          marker-start="url(#arr-purple-rev)"
-          marker-end="url(#arr-purple)"/>
-  </svg>
+  </div>
 </div>
 
 <!-- Requirements -->
-<div class="reqs">
-  <div class="section-label">必须实现</div>
+<div class="reqs-card">
 
-  <div class="req-row">
-    <span class="req-icon">💬</span>
-    <div class="req-text">
-      <strong>消息输入 → LLM 推理</strong>
-      <span>用户发一条消息，LLM 能接收并生成推理结果</span>
-    </div>
-  </div>
-
-  <div class="req-row">
-    <span class="req-icon">🛠️</span>
-    <div class="req-text">
-      <strong>Tool Call 执行</strong>
-      <span>至少支持一个工具（Bash / Shell，根据操作系统选择）</span>
-    </div>
-  </div>
-
-  <div class="req-row">
-    <span class="req-icon">🔁</span>
-    <div class="req-text">
-      <strong>循环直到完成</strong>
-      <span>LLM 调用工具 → 获取结果 → 继续推理，直到输出最终回复</span>
-    </div>
+  <div class="sec-header">
+    <span class="sec-header-label">验收要求</span>
   </div>
 
   <div class="req-row">
     <span class="req-icon">✅</span>
     <div class="req-text">
       <strong>可对话验收</strong>
-      <span>最终需能在网页、CLI 或任何界面中与 agent loop 真实对话</span>
+      <p>最终需能在网页、CLI 或任何界面中与 agent loop 真实对话</p>
     </div>
   </div>
 
-  <div class="section-label">加分项</div>
+  <div class="bonus-sec-header">
+    <span class="sec-header-label">加分项</span>
+  </div>
 
   <div class="req-row bonus">
     <span class="req-icon">🧠</span>
-    <div class="req-text">
-      <strong>Memory</strong>
-      <span>跨轮次记忆对话历史或用户偏好</span>
-    </div>
+    <div class="req-text"><strong>Memory</strong></div>
   </div>
 
   <div class="req-row bonus">
     <span class="req-icon">⚙️</span>
-    <div class="req-text">
-      <strong>Skills / Multi-tool</strong>
-      <span>支持多个工具，或将常用能力封装为可复用的 skill</span>
-    </div>
+    <div class="req-text"><strong>Skills / Multi-tool</strong></div>
   </div>
+
 </div>
 
 </body>
