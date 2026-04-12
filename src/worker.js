@@ -700,6 +700,9 @@ function restartExam() {
   examToken = null; examQuestions = []; examAnswers = {};
   clearInterval(timerInterval); startTime = null;
   document.getElementById('register-form').reset();
+  const btn = document.getElementById('start-btn');
+  btn.disabled = false;
+  btn.querySelector('span').textContent = 'Start Exam';
   showScreen('screen-register');
 }
 
