@@ -1,0 +1,18 @@
+name = "cca-exam"
+main = "src/worker.js"
+compatibility_date = "2024-09-23"
+
+# KV Namespace for storing exam sessions and results
+# Run: npm run kv:create  to create the namespace, then fill in the id below
+[[kv_namespaces]]
+binding = "EXAM_KV"
+id = "c76012f8ebe74a7c9f38d72a548dcb22"
+preview_id = "a9fe720ff0a34b2ab1f62d1f9edb6914"
+
+# Environment variables — configure via: wrangler secret put RESEND_API_KEY
+# Required secrets:
+#   RESEND_API_KEY  — your Resend.com API key
+#   ADMIN_EMAIL     — where exam results are emailed
+# Optional:
+#   EMAIL_FROM      — sender address (e.g. "CCA Exam <exam@yourdomain.com>")
+#   ADMIN_KEY       — secret key to view /admin results page
