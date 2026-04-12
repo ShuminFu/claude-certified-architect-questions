@@ -88,7 +88,7 @@ const HTML = `<!DOCTYPE html>
 
   /* ── Register ── */
   #screen-register {
-    display: flex; align-items: center; justify-content: center;
+    align-items: center; justify-content: center;
     min-height: 100vh; padding: 24px;
   }
   #screen-register.active { display: flex; }
@@ -425,6 +425,7 @@ async function loadExam() {
 
   renderQuestions(examQuestions);
   showScreen('screen-exam');
+  window.scrollTo(0, 0);
   startTime = Date.now();
   startTimer();
 }
@@ -855,11 +856,13 @@ async function handleSubmit(request, env, ctx) {
   // Delete the session to prevent re-submission
   await env.EXAM_KV.delete(`session:${token}`);
 
-  // Send email to admin via ctx.waitUntil so it completes after the response is sent
+  // Send email to admin (await directly — simpler and more reliable)
   if (env.RESEND_API_KEY && env.ADMIN_EMAIL) {
-    ctx.waitUntil(
-      sendAdminEmail(env, result).catch(err => console.error('[email] send failed:', err))
-    );
+    try {
+      await sendAdminEmail(env, result);
+    } catch (err) {
+      console.error('[email] send failed:', err.message);
+    }
   }
 
   return json({ success: true, result });
