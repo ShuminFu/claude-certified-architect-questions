@@ -2,7 +2,7 @@ import questionsData from '../cca_questions.json';
 
 const QUESTIONS = questionsData.questions;
 const DOMAINS = questionsData.meta.domains;
-const QUESTIONS_PER_DOMAIN = 3;
+const QUESTIONS_PER_DOMAIN = 4;
 
 // ─── Utilities ───────────────────────────────────────────────────────────────
 
@@ -932,17 +932,85 @@ async function sendAdminEmail(env, result) {
   }
 }
 
+// ─── Admin Auth Helpers ───────────────────────────────────────────────────────
+
+async function adminHmac(adminKey) {
+  const key = await crypto.subtle.importKey(
+    'raw', new TextEncoder().encode(adminKey),
+    { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']
+  );
+  const sig = await crypto.subtle.sign('HMAC', key, new TextEncoder().encode('admin-session'));
+  return Array.from(new Uint8Array(sig)).map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+function getAdminCookie(request) {
+  const cookie = request.headers.get('Cookie') || '';
+  return cookie.match(/admin_auth=([^;]+)/)?.[1] ?? null;
+}
+
+function adminLoginPage(error = false) {
+  const html = `<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Admin Login · CCA Exam</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:system-ui,-apple-system,sans-serif;background:#f5f0e8;min-height:100vh;display:flex;align-items:center;justify-content:center}
+  .card{background:#fff;border:1px solid #e8e0d4;border-radius:12px;padding:40px;width:100%;max-width:360px;box-shadow:0 2px 12px rgba(26,23,20,.08)}
+  h1{font-size:20px;font-weight:700;color:#1a1714;margin-bottom:6px}
+  .sub{font-size:13px;color:#9b9189;margin-bottom:28px}
+  label{display:block;font-size:12px;font-weight:600;color:#5c5650;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
+  input[type=password]{width:100%;padding:10px 14px;border:1px solid #ddd6cc;border-radius:7px;font-size:14px;color:#1a1714;background:#faf8f5;outline:none;transition:border .15s}
+  input[type=password]:focus{border-color:#c9a96e;background:#fff}
+  .error{font-size:12px;color:#9b2335;margin-top:8px;display:${error ? 'block' : 'none'}}
+  button{width:100%;margin-top:20px;padding:11px;background:#1a1714;color:#f5f0e8;border:none;border-radius:7px;font-size:14px;font-weight:600;cursor:pointer;transition:opacity .15s}
+  button:hover{opacity:.85}
+</style>
+</head><body>
+<div class="card">
+  <h1>Admin Access</h1>
+  <p class="sub">CCA Exam Results Dashboard</p>
+  <form method="POST" action="/admin">
+    <label for="pw">Password</label>
+    <input type="password" id="pw" name="password" placeholder="Enter admin password" autofocus>
+    <p class="error">Incorrect password. Please try again.</p>
+    <button type="submit">Sign in</button>
+  </form>
+</div>
+</body></html>`;
+  return new Response(html, { headers: { 'Content-Type': 'text/html; charset=utf-8' } });
+}
+
 // ─── Admin Results Page ───────────────────────────────────────────────────────
 
 async function handleAdmin(request, env) {
-  const url = new URL(request.url);
-  const key = url.searchParams.get('key');
+  // POST → process login form
+  if (request.method === 'POST') {
+    const formData = await request.formData();
+    const password = formData.get('password') ?? '';
 
-  if (!env.ADMIN_KEY || key !== env.ADMIN_KEY) {
-    return new Response('Unauthorized', { status: 401 });
+    if (!env.ADMIN_KEY || password !== env.ADMIN_KEY) {
+      return adminLoginPage(true);
+    }
+
+    const token = await adminHmac(env.ADMIN_KEY);
+    return new Response(null, {
+      status: 302,
+      headers: {
+        Location: '/admin',
+        'Set-Cookie': `admin_auth=${token}; HttpOnly; Secure; SameSite=Strict; Max-Age=28800`,
+      },
+    });
   }
 
-  // List all result keys
+  // GET → check session cookie
+  const cookie = getAdminCookie(request);
+  if (!env.ADMIN_KEY || !cookie) return adminLoginPage(false);
+
+  const expected = await adminHmac(env.ADMIN_KEY);
+  if (cookie !== expected) return adminLoginPage(false);
+
+  // Authenticated — render results
   const list = await env.EXAM_KV.list({ prefix: 'result:' });
   const results = await Promise.all(
     list.keys.map(async ({ name }) => env.EXAM_KV.get(name, 'json'))
@@ -964,18 +1032,22 @@ async function handleAdmin(request, env) {
   }).join('');
 
   const html = `<!DOCTYPE html>
-<html><head><meta charset="UTF-8"><title>CCA Exam Results</title>
+<html lang="en"><head><meta charset="UTF-8"><title>CCA Exam Results</title>
 <style>
-  body{font-family:system-ui,sans-serif;background:#f9fafb;padding:32px}
-  h1{color:#4f46e5;margin-bottom:8px}
-  .count{color:#6b7280;margin-bottom:24px}
-  table{width:100%;border-collapse:collapse;background:#fff;border-radius:8px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,.08)}
-  th{background:#4f46e5;color:#fff;padding:10px 14px;text-align:left;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.4px}
-  td{padding:10px 14px;border-bottom:1px solid #f3f4f6;font-size:13px;color:#374151}
+  *{box-sizing:border-box}
+  body{font-family:system-ui,sans-serif;background:#f5f0e8;padding:32px;min-height:100vh}
+  h1{color:#1a1714;margin-bottom:6px;font-size:22px}
+  .count{color:#9b9189;margin-bottom:24px;font-size:14px}
+  .logout{float:right;font-size:13px;color:#9b9189;text-decoration:none;padding:6px 12px;border:1px solid #ddd6cc;border-radius:6px;background:#fff}
+  .logout:hover{background:#f5f0e8}
+  table{width:100%;border-collapse:collapse;background:#fff;border-radius:10px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,.07)}
+  th{background:#1a1714;color:#f5f0e8;padding:10px 14px;text-align:left;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px}
+  td{padding:10px 14px;border-bottom:1px solid #f3ede4;font-size:13px;color:#374151}
   tr:last-child td{border-bottom:none}
-  tr:hover td{background:#f9fafb}
+  tr:hover td{background:#faf8f5}
 </style></head>
 <body>
+  <a href="/admin/logout" class="logout">Sign out</a>
   <h1>CCA Exam Results</h1>
   <p class="count">${valid.length} submission${valid.length !== 1 ? 's' : ''}</p>
   <table>
@@ -1020,6 +1092,15 @@ export default {
       }
       if (url.pathname === '/admin') {
         return handleAdmin(request, env);
+      }
+      if (url.pathname === '/admin/logout') {
+        return new Response(null, {
+          status: 302,
+          headers: {
+            Location: '/admin',
+            'Set-Cookie': 'admin_auth=; HttpOnly; Secure; SameSite=Strict; Max-Age=0',
+          },
+        });
       }
       return new Response('Not Found', { status: 404 });
     } catch (err) {

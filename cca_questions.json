@@ -1,7 +1,7 @@
 {
   "meta": {
     "title": "CCA Foundations Practice Questions",
-    "total_questions": 105,
+    "total_questions": 111,
     "domains": [
       {
         "id": 1,
@@ -25,7 +25,7 @@
         "id": 4,
         "name": "Prompt Engineering & Structured Output",
         "weight_pct": 20,
-        "question_count": 20
+        "question_count": 26
       },
       {
         "id": 5,
@@ -84,6 +84,13 @@
         "primary_domains": [
           4,
           5
+        ]
+      },
+      {
+        "id": 7,
+        "name": "Prompt Caching Strategy",
+        "primary_domains": [
+          4
         ]
       }
     ],
@@ -1772,6 +1779,102 @@
       },
       "correct_answer": "B",
       "explanation": "argument-hint frontmatter prompts developers with a descriptive hint for required parameters when they invoke the skill without providing arguments, improving skill discoverability and usability. REFERENCE QUICK REFERENCE — CONCEPTS YOU MUST KNOW Concept Value to Remember stop_reason values 'tool_use' → continue loop | 'end_turn' → terminate loop tool_choice options 'auto' (may skip tools) | 'any' (must call a tool) | {type:'tool', name:'X'} (force specific) CLAUDE.md hierarchy User (~/.claude/CLAUDE.md) → Project (.claude/CLAUDE.md) → Directory MCP server scoping .mcp.json = project/shared | ~/.claude.json = personal/experimental Batch API 50% cost savings | Up to 24h processing | No latency SLA | No mid-request tool calling Real-time API Required for blocking workflows (pre-merge checks, live support sessions) plan mode Multi-file changes, architectural decisions, multiple valid approaches direct execution Single-file changes, clear scope, well-understood tasks context: fork Runs skill in isolated sub-agent — prevents verbose output polluting main session .claude/commands/ Project-scoped slash commands (version controlled, shared with all team members) ~/.claude/commands/ Personal slash commands (not shared via version control) fork_session Create independent exploration branches from a shared analysis baseline --resume Continue a specific named prior conversation session -p / --print flag Non-interactive CI/CD mode — processes prompt and exits without input PostToolUse hook Intercept tool results for normalisation before model processes them Pre-tool hook Intercept outgoing calls to enforce compliance (blocks policy violations server-side) isError flag Set true on failures; include errorCategory + isRetryable in the response body Null handling Add explicit instruction 'return null if not mentioned' + nullable field in schema Resilient schema 'other' enum value + detail string field for extensible categorisation Schema redundancy calculated_total + stated_total → flag discrepancy for human review Scratchpad pattern Agent maintains scratchpad.md with key findings to combat context degradation Shared vector store Subagents index outputs; subsequent agents retrieve relevant context via semantic search Structured handoff customer_id + root_cause + amount + recommended_action (not raw transcript) Retry limits Retries fix format errors; NOT effective when information is absent from source document /compact command Reduce context usage during extended sessions without ending them Foundations Certification The complete practice question bank, cheat sheets, and exam strategy guides are available at: — Full 105-question practice bank with explanations — All 12 official Anthropic sample questions labelled — Quick Reference Cheat Sheet — 25 critical concepts — Key Mental Models & Common Exam Traps guide — Domain-by-domain study strategy © 2026 claudecertified.com | Not affiliated with Anthropic PBC",
+      "is_official_sample": false
+    },
+    {
+      "id": 106,
+      "domain": 4,
+      "domain_name": "Prompt Engineering & Structured Output",
+      "scenario": "Prompt Caching Strategy",
+      "question": "Which scenario benefits most from prompt caching?",
+      "options": {
+        "A": "Each request uses a completely different system prompt tailored to the specific task.",
+        "B": "A high volume of requests share the same system prompt and tool definitions, with only the user message varying.",
+        "C": "A one-off batch job processes each document exactly once with no repeated context.",
+        "D": "Conversations average fewer than two turns with minimal shared context."
+      },
+      "correct_answer": "B",
+      "explanation": "Prompt caching delivers value when the same prefix is reused across many requests. A stable system prompt and tool definitions shared across high-volume requests is the ideal pattern — the cache is written once and read repeatedly. Options A, C, and D all describe scenarios with little or no prefix reuse.",
+      "is_official_sample": false
+    },
+    {
+      "id": 107,
+      "domain": 4,
+      "domain_name": "Prompt Engineering & Structured Output",
+      "scenario": "Prompt Caching Strategy",
+      "question": "To maximise cache hit rate, how should prompt content be organised?",
+      "options": {
+        "A": "Place static content (system prompt, tool definitions, few-shot examples) first; append dynamic content (user input) at the end.",
+        "B": "Place dynamic content first so the model can prioritise the most relevant information.",
+        "C": "Interleave static and dynamic content to improve readability.",
+        "D": "Randomise the order on each request for security purposes."
+      },
+      "correct_answer": "A",
+      "explanation": "Cache matching is prefix-based: the cached content must be an exact, unbroken prefix of each new request. Placing stable content at the front ensures the cache key is identical across requests. Any dynamic content appearing before static content breaks the shared prefix, preventing cache hits on the static portion.",
+      "is_official_sample": false
+    },
+    {
+      "id": 108,
+      "domain": 4,
+      "domain_name": "Prompt Engineering & Structured Output",
+      "scenario": "Prompt Caching Strategy",
+      "question": "Which workload characteristic most strongly suggests that prompt caching will provide limited benefit?",
+      "options": {
+        "A": "Requests arrive in high-concurrency batches of hundreds simultaneously.",
+        "B": "The system prompt exceeds 10,000 tokens.",
+        "C": "Each user's system prompt is dynamically generated from their account profile, making virtually no two requests identical.",
+        "D": "Conversations are long, averaging more than 10 turns."
+      },
+      "correct_answer": "C",
+      "explanation": "Caching requires a reusable prefix. If the system prompt is uniquely generated per user, the prefix changes on every request and the cache can never be hit, regardless of prompt length or conversation length. Options A, B, and D describe characteristics that do not inherently prevent cache reuse.",
+      "is_official_sample": false
+    },
+    {
+      "id": 109,
+      "domain": 4,
+      "domain_name": "Prompt Engineering & Structured Output",
+      "scenario": "Prompt Caching Strategy",
+      "question": "A multi-turn agent has prompt caching enabled, caching the full system prompt and conversation history prefix. An engineer compresses conversation history every 5 turns to prevent context overflow. After deployment, cost savings are consistently lower than expected, despite monitoring showing a high cache hit rate. What best explains this discrepancy?",
+      "options": {
+        "A": "Summarisation introduces latency that offsets the cost savings from caching.",
+        "B": "The hit-rate metric counts hits across all turns, but each compression turn replaces the history prefix and triggers a cache write — a cost the hit-rate metric does not surface.",
+        "C": "A high cache hit rate confirms the system is working correctly; the savings shortfall must be caused by the model version not supporting caching.",
+        "D": "Compression increases output token count, which drives up overall cost independently of caching."
+      },
+      "correct_answer": "B",
+      "explanation": "Cache hit rate measures how often a read occurs, but does not account for the cost of write events. Each compression turn replaces the history prefix, invalidating the cached content and triggering a cache write. Writes are more expensive than regular reads, so periodic invalidation can substantially erode net savings even when the overall hit rate appears healthy.",
+      "is_official_sample": false
+    },
+    {
+      "id": 110,
+      "domain": 4,
+      "domain_name": "Prompt Engineering & Structured Output",
+      "scenario": "Prompt Caching Strategy",
+      "question": "Two teams are building pipelines to answer questions about a large legal document corpus. Team A uses RAG: each request dynamically assembles the most relevant document chunks. Team B embeds the full corpus as a fixed system prompt shared across all requests. Which team's design is better positioned to benefit from prompt caching, and why?",
+      "options": {
+        "A": "Team A, because shorter RAG-assembled prompts reach the cache threshold more quickly and are easier to invalidate when documents change.",
+        "B": "Team B, because the fixed corpus forms a stable, identical prefix across every request — written to cache once and read on all subsequent requests.",
+        "C": "Both benefit equally; prompt caching applies to any content that exceeds the minimum token threshold regardless of how it was assembled.",
+        "D": "Team A, because dynamic retrieval allows the cache to store multiple specialised subsets tailored to different query types."
+      },
+      "correct_answer": "B",
+      "explanation": "Prompt caching requires prefix stability. Team B's fixed corpus is identical on every request, making it an ideal cache candidate. Team A's dynamically assembled chunks produce a different prefix per request, so the cache is almost never hit. The caching mechanism matches exact prefixes — it does not automatically partition or index content by topic.",
+      "is_official_sample": false
+    },
+    {
+      "id": 111,
+      "domain": 4,
+      "domain_name": "Prompt Engineering & Structured Output",
+      "scenario": "Prompt Caching Strategy",
+      "question": "An orchestrator forks 10 subagents in parallel. Each subagent prompt is structured as [task-specific instructions (500 tokens)] + [shared knowledge base (20,000 tokens)]. Monitoring shows 10 cache writes and zero cache reads on every invocation. The engineer swaps the order to [shared knowledge base] + [task-specific instructions], after which cache reads appear consistently. Why does swapping the order fix the problem?",
+      "options": {
+        "A": "Placing the knowledge base first allows the model to process high-density information earlier, reducing redundant computation.",
+        "B": "Cache matching is prefix-based. With task instructions first, each subagent's prefix diverges from the first token, so the shared knowledge base is never on a matchable cache path. Moving the knowledge base to the front makes it the common prefix — written once and readable by all subsequent subagents.",
+        "C": "Task instructions are short (500 tokens), so placing them at the end makes their contribution to total token cost negligible.",
+        "D": "Swapping the order reduces the string-concatenation overhead the orchestrator incurs when assembling each subagent's prompt at runtime."
+      },
+      "correct_answer": "B",
+      "explanation": "Prompt caching uses exact prefix matching. When task-specific instructions appear first, every subagent has a unique prefix from token 1 — the shared knowledge base is never reachable via a cached prefix. Placing the shared knowledge base first establishes a common prefix that can be cached once and hit by all 10 subagents. Options A, C, and D describe effects unrelated to the caching mechanism.",
       "is_official_sample": false
     }
   ]
