@@ -124,8 +124,8 @@ const HTML = `<!DOCTYPE html>
   }
   .reg-left h1 {
     font-family: 'Instrument Serif', Georgia, serif;
-    font-size: 36px; font-weight: 400; line-height: 1.2;
-    color: var(--bg); margin-bottom: 14px;
+    font-size: 44px; font-weight: 400; font-style: italic; line-height: 1.15;
+    color: var(--bg); margin-bottom: 16px; letter-spacing: -.3px;
   }
   .reg-left p {
     font-size: 14px; color: rgba(245,240,232,.55); line-height: 1.7; margin-bottom: 36px;
@@ -158,7 +158,7 @@ const HTML = `<!DOCTYPE html>
   }
   .reg-card h2 {
     font-family: 'Instrument Serif', serif;
-    font-size: 26px; font-weight: 400; margin-bottom: 6px;
+    font-size: 32px; font-weight: 400; font-style: italic; line-height: 1.2; margin-bottom: 8px;
   }
   .reg-card > p { font-size: 13.5px; color: var(--text-2); margin-bottom: 32px; line-height: 1.5; }
   .form-group { margin-bottom: 20px; }
@@ -404,7 +404,7 @@ const HTML = `<!DOCTYPE html>
   @media (max-width: 700px) {
     #screen-register { flex-direction: column; }
     .reg-left { width: 100%; padding: 36px 24px; }
-    .reg-left h1 { font-size: 28px; }
+    .reg-left h1 { font-size: 34px; }
     .domain-list { display: none; }
     .reg-right { padding: 28px 16px; }
     .reg-card { padding: 32px 24px; }
