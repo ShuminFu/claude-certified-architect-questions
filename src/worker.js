@@ -1100,11 +1100,19 @@ async function handleAdminResult(token, env) {
       const isGiven = letter === q.given;
       const isCorrect = letter === q.correct;
       let style = 'color:#374151;';
+      let rowStyle = 'padding:6px 8px;border-radius:5px;margin-bottom:2px;font-size:13px;color:#374151;';
       let badge = '';
-      if (isCorrect) { style = 'color:#059669;font-weight:700;'; badge = ' <span style="background:#dcfce7;color:#059669;font-size:10px;padding:1px 6px;border-radius:10px;font-weight:700;">Correct</span>'; }
-      if (isGiven && !isCorrect) { style = 'color:#dc2626;font-weight:700;text-decoration:line-through;'; badge = ' <span style="background:#fee2e2;color:#dc2626;font-size:10px;padding:1px 6px;border-radius:10px;font-weight:700;">Selected</span>'; }
-      if (isGiven && isCorrect) { badge = ' <span style="background:#dcfce7;color:#059669;font-size:10px;padding:1px 6px;border-radius:10px;font-weight:700;">Selected · Correct</span>'; }
-      return `<div style="padding:4px 0;font-size:13px;${style}"><strong>${letter}.</strong> ${escHtml(text)}${badge}</div>`;
+      if (isGiven && isCorrect) {
+        rowStyle = 'padding:6px 8px;border-radius:5px;margin-bottom:2px;font-size:13px;background:#dcfce7;color:#059669;font-weight:700;';
+        badge = ' <span style="background:#059669;color:#fff;font-size:10px;padding:1px 7px;border-radius:10px;font-weight:700;margin-left:4px;">Selected · Correct</span>';
+      } else if (isGiven) {
+        rowStyle = 'padding:6px 8px;border-radius:5px;margin-bottom:2px;font-size:13px;background:#fee2e2;color:#dc2626;font-weight:700;';
+        badge = ' <span style="background:#dc2626;color:#fff;font-size:10px;padding:1px 7px;border-radius:10px;font-weight:700;margin-left:4px;">Selected</span>';
+      } else if (isCorrect) {
+        rowStyle = 'padding:6px 8px;border-radius:5px;margin-bottom:2px;font-size:13px;background:#dcfce7;color:#059669;font-weight:700;';
+        badge = ' <span style="background:#059669;color:#fff;font-size:10px;padding:1px 7px;border-radius:10px;font-weight:700;margin-left:4px;">Correct</span>';
+      }
+      return `<div style="${rowStyle}"><strong>${letter}.</strong> ${escHtml(text)}${badge}</div>`;
     }).join('');
 
     return `<div style="margin-bottom:16px;background:${bg};border:1px solid ${correct ? '#bbf7d0' : '#fecaca'};border-radius:8px;padding:16px;">
