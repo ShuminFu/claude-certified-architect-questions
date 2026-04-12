@@ -998,7 +998,7 @@ async function handleAdmin(request, env) {
       status: 302,
       headers: {
         Location: '/admin',
-        'Set-Cookie': `admin_auth=${token}; HttpOnly; Secure; SameSite=Strict; Max-Age=28800`,
+        'Set-Cookie': `admin_auth=${token}; HttpOnly; Secure; SameSite=Strict; Max-Age=28800; Path=/`,
       },
     });
   }
@@ -1098,7 +1098,7 @@ export default {
           status: 302,
           headers: {
             Location: '/admin',
-            'Set-Cookie': 'admin_auth=; HttpOnly; Secure; SameSite=Strict; Max-Age=0',
+            'Set-Cookie': 'admin_auth=; HttpOnly; Secure; SameSite=Strict; Max-Age=0; Path=/',
           },
         });
       }
