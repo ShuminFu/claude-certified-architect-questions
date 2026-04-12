@@ -766,10 +766,35 @@ function generateEmailHTML(result) {
         </tr>
       </table>
 
-      <div style="border:1px solid #e5e7eb;border-radius:8px;overflow:hidden;">
+      <div style="border:1px solid #e5e7eb;border-radius:8px;overflow:hidden;margin-bottom:24px;">
         <div style="background:#f3f4f6;padding:8px 12px;font-size:12px;font-weight:700;color:#374151;text-transform:uppercase;letter-spacing:.4px;">Domain Breakdown</div>
         <table style="width:100%;border-collapse:collapse;">
           ${breakdownRows}
+        </table>
+      </div>
+
+      <div style="border:1px solid #e5e7eb;border-radius:8px;overflow:hidden;">
+        <div style="background:#f3f4f6;padding:8px 12px;font-size:12px;font-weight:700;color:#374151;text-transform:uppercase;letter-spacing:.4px;">Question Breakdown</div>
+        <table style="width:100%;border-collapse:collapse;">
+          ${(result.questionResults || []).map((q, i) => {
+            const correct = q.isCorrect;
+            const icon = correct ? '✓' : '✗';
+            const iconColor = correct ? '#059669' : '#dc2626';
+            const rowBg = correct ? '#f0fdf4' : '#fff5f5';
+            const short = q.question.length > 90 ? q.question.slice(0, 87) + '…' : q.question;
+            return `<tr style="background:${rowBg};border-top:1px solid #e5e7eb;">
+              <td style="padding:8px 10px;font-size:18px;color:${iconColor};font-weight:700;width:28px;text-align:center;">${icon}</td>
+              <td style="padding:8px 10px;">
+                <div style="font-size:11px;color:#9ca3af;margin-bottom:2px;">Q${i + 1} · ${q.domain_name}</div>
+                <div style="font-size:12px;color:#374151;margin-bottom:4px;">${escHtml(short)}</div>
+                <div style="font-size:12px;">
+                  <span style="color:#6b7280;">Picked:</span>
+                  <strong style="color:${correct ? '#059669' : '#dc2626'};">${q.given || '—'}</strong>
+                  ${!correct ? `&nbsp;·&nbsp;<span style="color:#6b7280;">Correct:</span> <strong style="color:#059669;">${q.correct}</strong>` : ''}
+                </div>
+              </td>
+            </tr>`;
+          }).join('')}
         </table>
       </div>
     </div>
@@ -1012,12 +1037,15 @@ async function handleAdmin(request, env) {
 
   // Authenticated — render results
   const list = await env.EXAM_KV.list({ prefix: 'result:' });
-  const results = await Promise.all(
-    list.keys.map(async ({ name }) => env.EXAM_KV.get(name, 'json'))
+  const pairs = await Promise.all(
+    list.keys.map(async ({ name: kvKey }) => ({
+      token: kvKey.replace('result:', ''),
+      result: await env.EXAM_KV.get(kvKey, 'json'),
+    }))
   );
-  const valid = results.filter(Boolean).sort((a, b) => new Date(b.submittedAt) - new Date(a.submittedAt));
+  const valid = pairs.filter(p => p.result).sort((a, b) => new Date(b.result.submittedAt) - new Date(a.result.submittedAt));
 
-  const rows = valid.map(r => {
+  const rows = valid.map(({ token, result: r }) => {
     const pass = r.scaledScore >= 720;
     return `<tr>
       <td>${new Date(r.submittedAt).toLocaleString('en-US', { dateStyle: 'short', timeStyle: 'short' })}</td>
@@ -1028,6 +1056,7 @@ async function handleAdmin(request, env) {
       <td>${r.scaledScore}/1000</td>
       <td><span style="color:${pass ? '#059669' : '#dc2626'};font-weight:700;">${pass ? 'PASS' : 'FAIL'}</span></td>
       <td>${formatTime(r.timeTaken)}</td>
+      <td><a href="/admin/result/${token}" style="color:#c9a96e;font-size:12px;text-decoration:none;font-weight:600;">Details →</a></td>
     </tr>`;
   }).join('');
 
@@ -1051,9 +1080,69 @@ async function handleAdmin(request, env) {
   <h1>CCA Exam Results</h1>
   <p class="count">${valid.length} submission${valid.length !== 1 ? 's' : ''}</p>
   <table>
-    <thead><tr><th>Date</th><th>Name</th><th>Email</th><th>Score</th><th>%</th><th>Scaled</th><th>Result</th><th>Time</th></tr></thead>
-    <tbody>${rows || '<tr><td colspan="8" style="text-align:center;color:#9ca3af;padding:40px">No results yet</td></tr>'}</tbody>
+    <thead><tr><th>Date</th><th>Name</th><th>Email</th><th>Score</th><th>%</th><th>Scaled</th><th>Result</th><th>Time</th><th></th></tr></thead>
+    <tbody>${rows || '<tr><td colspan="9" style="text-align:center;color:#9ca3af;padding:40px">No results yet</td></tr>'}</tbody>
   </table>
+</body></html>`;
+
+  return new Response(html, { headers: { 'Content-Type': 'text/html; charset=utf-8' } });
+}
+
+async function handleAdminResult(token, env) {
+  const result = await env.EXAM_KV.get(`result:${token}`, 'json');
+  if (!result) return new Response('Result not found', { status: 404 });
+
+  const pass = result.scaledScore >= 720;
+  const qRows = (result.questionResults || []).map((q, i) => {
+    const correct = q.isCorrect;
+    const bg = correct ? '#f0fdf4' : '#fff5f5';
+    const optionRows = Object.entries(q.options || {}).map(([letter, text]) => {
+      const isGiven = letter === q.given;
+      const isCorrect = letter === q.correct;
+      let style = 'color:#374151;';
+      let badge = '';
+      if (isCorrect) { style = 'color:#059669;font-weight:700;'; badge = ' <span style="background:#dcfce7;color:#059669;font-size:10px;padding:1px 6px;border-radius:10px;font-weight:700;">Correct</span>'; }
+      if (isGiven && !isCorrect) { style = 'color:#dc2626;font-weight:700;text-decoration:line-through;'; badge = ' <span style="background:#fee2e2;color:#dc2626;font-size:10px;padding:1px 6px;border-radius:10px;font-weight:700;">Selected</span>'; }
+      if (isGiven && isCorrect) { badge = ' <span style="background:#dcfce7;color:#059669;font-size:10px;padding:1px 6px;border-radius:10px;font-weight:700;">Selected · Correct</span>'; }
+      return `<div style="padding:4px 0;font-size:13px;${style}"><strong>${letter}.</strong> ${escHtml(text)}${badge}</div>`;
+    }).join('');
+
+    return `<div style="margin-bottom:16px;background:${bg};border:1px solid ${correct ? '#bbf7d0' : '#fecaca'};border-radius:8px;padding:16px;">
+      <div style="font-size:11px;color:#9ca3af;margin-bottom:6px;">Q${i + 1} · ${escHtml(q.domain_name)}</div>
+      <div style="font-size:14px;font-weight:600;color:#1a1714;margin-bottom:12px;">${escHtml(q.question)}</div>
+      <div style="margin-bottom:12px;">${optionRows}</div>
+      <div style="font-size:12px;color:#6b7280;border-top:1px solid ${correct ? '#bbf7d0' : '#fecaca'};padding-top:10px;margin-top:4px;"><strong>Explanation:</strong> ${escHtml(q.explanation || '')}</div>
+    </div>`;
+  }).join('');
+
+  const html = `<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><title>Result Detail · ${escHtml(result.name)}</title>
+<style>
+  *{box-sizing:border-box}
+  body{font-family:system-ui,sans-serif;background:#f5f0e8;padding:32px;min-height:100vh;max-width:760px;margin:0 auto}
+  .back{display:inline-block;font-size:13px;color:#9b9189;text-decoration:none;margin-bottom:20px}
+  .back:hover{color:#1a1714}
+  h1{color:#1a1714;font-size:20px;margin-bottom:4px}
+  .meta{color:#9b9189;font-size:13px;margin-bottom:24px}
+  .summary{background:#fff;border:1px solid #e8e0d4;border-radius:10px;padding:20px;margin-bottom:28px;display:flex;gap:24px;flex-wrap:wrap}
+  .stat{text-align:center}
+  .stat-val{font-size:22px;font-weight:700;color:#1a1714}
+  .stat-lbl{font-size:11px;color:#9b9189;text-transform:uppercase;letter-spacing:.4px}
+  h2{font-size:14px;font-weight:700;color:#1a1714;text-transform:uppercase;letter-spacing:.4px;margin-bottom:14px}
+</style></head>
+<body>
+  <a href="/admin" class="back">← Back to results</a>
+  <h1>${escHtml(result.name)}</h1>
+  <div class="meta">${escHtml(result.email)} · ${new Date(result.submittedAt).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' })}</div>
+  <div class="summary">
+    <div class="stat"><div class="stat-val">${result.score}/${result.total}</div><div class="stat-lbl">Score</div></div>
+    <div class="stat"><div class="stat-val">${result.percentage}%</div><div class="stat-lbl">Correct</div></div>
+    <div class="stat"><div class="stat-val">${result.scaledScore}/1000</div><div class="stat-lbl">Scaled</div></div>
+    <div class="stat"><div class="stat-val" style="color:${pass ? '#059669' : '#dc2626'}">${pass ? 'PASS' : 'FAIL'}</div><div class="stat-lbl">Result</div></div>
+    <div class="stat"><div class="stat-val">${formatTime(result.timeTaken)}</div><div class="stat-lbl">Time</div></div>
+  </div>
+  <h2>Question Breakdown</h2>
+  ${qRows || '<p style="color:#9ca3af">No question detail available.</p>'}
 </body></html>`;
 
   return new Response(html, { headers: { 'Content-Type': 'text/html; charset=utf-8' } });
@@ -1092,6 +1181,15 @@ export default {
       }
       if (url.pathname === '/admin') {
         return handleAdmin(request, env);
+      }
+      if (url.pathname.startsWith('/admin/result/')) {
+        // Require auth for result detail pages too
+        const cookie = getAdminCookie(request);
+        if (!env.ADMIN_KEY || !cookie || cookie !== await adminHmac(env.ADMIN_KEY)) {
+          return new Response(null, { status: 302, headers: { Location: '/admin' } });
+        }
+        const token = url.pathname.replace('/admin/result/', '');
+        return handleAdminResult(token, env);
       }
       if (url.pathname === '/admin/logout') {
         return new Response(null, {
