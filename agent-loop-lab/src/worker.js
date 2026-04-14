@@ -271,8 +271,8 @@ const HTML = `<!DOCTYPE html>
 
 <p class="brand">Claude Code · 动手实践题</p>
 
-<h1>写一个能用的最小 Agent Loop</h1>
-<p class="subtitle">实现下图所示的循环，让 LLM 能够调用工具并持续推理，直到任务完成</p>
+<h1>实现一个 Agent Loop</h1>
+<p class="subtitle">基于下图的核心循环，设计并实现你对 Agent Loop 的理解。规模、工具、形态不限，重点是展示你对这一范式的思考与取舍</p>
 
 <!-- Diagram card -->
 <div class="card">
@@ -400,6 +400,47 @@ const HTML = `<!DOCTYPE html>
   </div>
 </div>
 
+<!-- Example tasks -->
+<div class="reqs-card" style="margin-bottom: 16px;">
+
+  <div class="sec-header">
+    <span class="sec-header-label">示例任务 · 本机系统诊断</span>
+  </div>
+
+  <div class="req-row">
+    <span class="req-icon">🎯</span>
+    <div class="req-text">
+      <strong>让你的 agent 能完成下列任意一个本机诊断任务</strong>
+      <p>这些任务没有固定命令序列，每一步都要基于上一步的输出决定下一步查什么——正是体现 Agent Loop 能力的场景</p>
+    </div>
+  </div>
+
+  <div class="req-row">
+    <span class="req-icon">🔥</span>
+    <div class="req-text">
+      <strong>CPU / 内存占用排查</strong>
+      <p>找出当前最占 CPU 或内存的进程，说明它是什么、在做什么、是否需要关注</p>
+    </div>
+  </div>
+
+  <div class="req-row">
+    <span class="req-icon">💾</span>
+    <div class="req-text">
+      <strong>磁盘空间诊断</strong>
+      <p>"磁盘快满了" —— 找出最占空间的目录并给出清理建议</p>
+    </div>
+  </div>
+
+  <div class="req-row">
+    <span class="req-icon">🌐</span>
+    <div class="req-text">
+      <strong>端口占用排查</strong>
+      <p>查清某个端口被谁占用、对应进程是什么、服务是否健康</p>
+    </div>
+  </div>
+
+</div>
+
 <!-- Requirements -->
 <div class="reqs-card">
 
@@ -408,25 +449,71 @@ const HTML = `<!DOCTYPE html>
   </div>
 
   <div class="req-row">
-    <span class="req-icon">✅</span>
+    <span class="req-icon">🔁</span>
     <div class="req-text">
-      <strong>可对话验收</strong>
-      <p>最终需能在网页、CLI 或任何界面中与 agent loop 真实对话</p>
+      <strong>完整的循环</strong>
+      <p>LLM 能自主判断是否调用工具、处理工具结果、并持续推理直到给出最终答复</p>
+    </div>
+  </div>
+
+  <div class="req-row">
+    <span class="req-icon">🛠️</span>
+    <div class="req-text">
+      <strong>至少包含 Bash / Shell 工具</strong>
+      <p>可在此基础上扩展任意其它工具，数量、形态不限</p>
+    </div>
+  </div>
+
+  <div class="req-row">
+    <span class="req-icon">💬</span>
+    <div class="req-text">
+      <strong>可交互验收</strong>
+      <p>能通过网页、CLI、Notebook 等任意界面真实对话体验</p>
     </div>
   </div>
 
   <div class="bonus-sec-header">
-    <span class="sec-header-label">加分项</span>
+    <span class="sec-header-label">加分项 · 任选方向自由发挥</span>
   </div>
 
   <div class="req-row bonus">
     <span class="req-icon">🧠</span>
-    <div class="req-text"><strong>Memory</strong></div>
+    <div class="req-text"><strong>Memory</strong> — 跨轮次 / 跨会话的上下文管理</div>
   </div>
 
   <div class="req-row bonus">
     <span class="req-icon">⚙️</span>
-    <div class="req-text"><strong>Skills / Multi-tool</strong></div>
+    <div class="req-text"><strong>Skills / Multi-tool</strong> — 多工具协作、工具选择策略</div>
+  </div>
+
+  <div class="req-row bonus">
+    <span class="req-icon">🧭</span>
+    <div class="req-text"><strong>Planning / Reflection / Robustness</strong> — 规划、反思、错误恢复、并行</div>
+  </div>
+
+  <div class="req-row bonus">
+    <span class="req-icon">🛡️</span>
+    <div class="req-text"><strong>Sandbox</strong> — 工具执行隔离、权限与资源边界</div>
+  </div>
+
+  <div class="req-row bonus">
+    <span class="req-icon">⚡</span>
+    <div class="req-text"><strong>Prompt Cache</strong> — 提示词缓存，降低延迟与成本</div>
+  </div>
+
+  <div class="req-row bonus">
+    <span class="req-icon">🗜️</span>
+    <div class="req-text"><strong>Context Engineering</strong> — 长对话压缩、窗口管理、上下文裁剪</div>
+  </div>
+
+  <div class="req-row bonus">
+    <span class="req-icon">📊</span>
+    <div class="req-text"><strong>Observability</strong> — 追踪、日志、Token / 成本统计</div>
+  </div>
+
+  <div class="req-row bonus">
+    <span class="req-icon">👥</span>
+    <div class="req-text"><strong>Subagents</strong> — 子 agent 分派、多角色协作</div>
   </div>
 
 </div>
