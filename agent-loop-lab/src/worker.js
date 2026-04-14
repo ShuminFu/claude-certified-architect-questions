@@ -141,73 +141,6 @@ const HTML = `<!DOCTYPE html>
   .nt { font-size: 12.5px; font-weight: 600; line-height: 1; color: var(--text); }
   .ns { font-size: 10px;   font-weight: 400; line-height: 1; color: var(--text-3); }
 
-  /* ── Connector SVG ── */
-  .connector { flex-shrink: 0; }
-
-  /* ── Context box ── */
-  .ctx-wrap {
-    background: var(--surface-2);
-    border: 1px solid var(--border-2);
-    border-radius: 12px;
-    padding: 18px 18px 14px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 12px;
-    flex-shrink: 0;
-    box-shadow: var(--shadow);
-    min-width: 148px;
-  }
-
-  .ctx-title {
-    font-size: 11px;
-    font-weight: 700;
-    color: var(--text-2);
-    letter-spacing: .06em;
-    text-transform: uppercase;
-  }
-
-  .ctx-nodes { display: flex; gap: 8px; }
-
-  .ctx-node {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 9px;
-    padding: 9px 10px 7px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 5px;
-    min-width: 58px;
-    box-shadow: var(--shadow);
-  }
-
-  .ctx-node span {
-    font-size: 10px;
-    font-weight: 600;
-    color: var(--text-2);
-    line-height: 1;
-    white-space: nowrap;
-  }
-
-  .ctx-badge {
-    background: var(--accent-bg);
-    border: 1px solid rgba(204,120,92,.2);
-    border-radius: 20px;
-    padding: 2px 10px;
-    font-size: 10px;
-    font-weight: 600;
-    color: var(--accent);
-    letter-spacing: .04em;
-  }
-
-  /* ── Diagram flex layout ── */
-  .diagram-inner {
-    display: flex;
-    align-items: center;
-    gap: 0;
-  }
-
   /* ── Requirements ── */
   .reqs-card {
     background: var(--surface);
@@ -253,8 +186,26 @@ const HTML = `<!DOCTYPE html>
     padding: 12px 24px;
   }
 
-  .req-icon { font-size: 1rem; flex-shrink: 0; margin-top: 2px; }
-  .req-row.bonus .req-icon { margin-top: 0; }
+  .req-icon {
+    flex-shrink: 0;
+    width: 18px;
+    height: 18px;
+    margin-top: 2px;
+    color: var(--accent);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .req-icon svg {
+    width: 100%;
+    height: 100%;
+    stroke: currentColor;
+    fill: none;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .req-row.bonus .req-icon { margin-top: 0; color: var(--text-2); }
 
   .req-text strong { font-weight: 600; color: var(--text); display: block; margin-bottom: 2px; }
   .req-text p { font-size: 13px; color: var(--text-2); }
@@ -264,6 +215,63 @@ const HTML = `<!DOCTYPE html>
     border-bottom: 1px solid var(--border);
     border-top: 1px solid var(--border);
     background: var(--bg);
+  }
+
+  /* ── Bonus grid inside diagram card ── */
+  .bonus-divider {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 36px 0 20px;
+    color: var(--text-3);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+  }
+  .bonus-divider::before,
+  .bonus-divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  .bonus-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+  }
+  .bonus-cell {
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 10px 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    text-align: center;
+  }
+  .bonus-cell svg {
+    width: 22px;
+    height: 22px;
+    stroke: var(--accent);
+    fill: none;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .bonus-cell .b-name {
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 1.25;
+    color: var(--text);
+    letter-spacing: .01em;
+  }
+  .loop-center { display: flex; justify-content: center; }
+  @media (max-width: 640px) {
+    .bonus-grid { grid-template-columns: repeat(2, 1fr); }
   }
 </style>
 </head>
@@ -276,7 +284,7 @@ const HTML = `<!DOCTYPE html>
 
 <!-- Diagram card -->
 <div class="card">
-  <div class="diagram-inner">
+  <div class="loop-center">
 
     <!-- Loop area -->
     <div class="loop-wrap">
@@ -347,57 +355,45 @@ const HTML = `<!DOCTYPE html>
       </div>
     </div>
 
-    <!-- Connector -->
-    <svg class="connector" width="52" height="212" viewBox="0 0 52 212">
-      <defs>
-        <marker id="ap"   markerWidth="7" markerHeight="7" refX="5.5" refY="3" orient="auto">
-          <path d="M0,0.5 L0,5.5 L6,3 Z" fill="#A09890"/>
-        </marker>
-        <marker id="ap-r" markerWidth="7" markerHeight="7" refX="0.5" refY="3" orient="auto">
-          <path d="M6,0.5 L6,5.5 L0,3 Z" fill="#A09890"/>
-        </marker>
-      </defs>
-      <line x1="6" y1="106" x2="46" y2="106"
-            stroke="#A09890" stroke-width="1.8" stroke-dasharray="4,3"
-            marker-start="url(#ap-r)" marker-end="url(#ap)"/>
-    </svg>
-
-    <!-- Context -->
-    <div class="ctx-wrap">
-      <span class="ctx-title">Context</span>
-      <div class="ctx-nodes">
-
-        <div class="ctx-node">
-          <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-            <ellipse cx="9" cy="9" rx="7" ry="6.5" fill="#6B6259" opacity="0.7"/>
-            <line x1="9" y1="2.5" x2="9" y2="15.5" stroke="white" stroke-width="1.1"/>
-            <path d="M3.5,6.5 Q9,4.5 14.5,6.5"  stroke="white" stroke-width="0.9" fill="none" opacity="0.6"/>
-            <path d="M2,9 Q9,7 16,9"             stroke="white" stroke-width="0.9" fill="none" opacity="0.6"/>
-            <path d="M3.5,11.5 Q9,9.5 14.5,11.5" stroke="white" stroke-width="0.9" fill="none" opacity="0.6"/>
-          </svg>
-          <span>Memory</span>
-        </div>
-
-        <div class="ctx-node">
-          <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-            <circle cx="9" cy="9" r="3" stroke="#6B6259" stroke-width="1.6" opacity="0.8"/>
-            <line x1="9" y1="1"  x2="9"  y2="4"  stroke="#6B6259" stroke-width="1.6" stroke-linecap="round" opacity="0.8"/>
-            <line x1="9" y1="14" x2="9"  y2="17" stroke="#6B6259" stroke-width="1.6" stroke-linecap="round" opacity="0.8"/>
-            <line x1="1" y1="9"  x2="4"  y2="9"  stroke="#6B6259" stroke-width="1.6" stroke-linecap="round" opacity="0.8"/>
-            <line x1="14" y1="9" x2="17" y2="9"  stroke="#6B6259" stroke-width="1.6" stroke-linecap="round" opacity="0.8"/>
-            <line x1="2.8" y1="2.8" x2="4.9" y2="4.9" stroke="#6B6259" stroke-width="1.4" stroke-linecap="round" opacity="0.7"/>
-            <line x1="13.1" y1="13.1" x2="15.2" y2="15.2" stroke="#6B6259" stroke-width="1.4" stroke-linecap="round" opacity="0.7"/>
-            <line x1="2.8" y1="15.2" x2="4.9" y2="13.1" stroke="#6B6259" stroke-width="1.4" stroke-linecap="round" opacity="0.7"/>
-            <line x1="13.1" y1="4.9" x2="15.2" y2="2.8" stroke="#6B6259" stroke-width="1.4" stroke-linecap="round" opacity="0.7"/>
-          </svg>
-          <span>Skills</span>
-        </div>
-
-      </div>
-      <span class="ctx-badge">加分项</span>
-    </div>
-
   </div>
+
+  <!-- Bonus grid -->
+  <div class="bonus-divider">加分方向 · 任选发挥</div>
+  <div class="bonus-grid">
+    <div class="bonus-cell">
+      <svg viewBox="0 0 24 24"><path d="M12 5a3 3 0 1 0-5.997.125 4 4 0 0 0-2.526 5.77 4 4 0 0 0 .556 6.588A4 4 0 1 0 12 21.67"/><path d="M12 5a3 3 0 1 1 5.997.125 4 4 0 0 1 2.526 5.77 4 4 0 0 1-.556 6.588A4 4 0 1 1 12 21.67"/></svg>
+      <span class="b-name">Memory</span>
+    </div>
+    <div class="bonus-cell">
+      <svg viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+      <span class="b-name">Skills</span>
+    </div>
+    <div class="bonus-cell">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88"/></svg>
+      <span class="b-name">Planning</span>
+    </div>
+    <div class="bonus-cell">
+      <svg viewBox="0 0 24 24"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/></svg>
+      <span class="b-name">Sandbox</span>
+    </div>
+    <div class="bonus-cell">
+      <svg viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+      <span class="b-name">Prompt Cache</span>
+    </div>
+    <div class="bonus-cell">
+      <svg viewBox="0 0 24 24"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
+      <span class="b-name">Context Eng.</span>
+    </div>
+    <div class="bonus-cell">
+      <svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      <span class="b-name">Observability</span>
+    </div>
+    <div class="bonus-cell">
+      <svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      <span class="b-name">Subagents</span>
+    </div>
+  </div>
+
 </div>
 
 <!-- Example tasks -->
@@ -408,7 +404,7 @@ const HTML = `<!DOCTYPE html>
   </div>
 
   <div class="req-row">
-    <span class="req-icon">🎯</span>
+    <span class="req-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg></span>
     <div class="req-text">
       <strong>让你的 agent 能完成下列任意一个本机诊断任务</strong>
       <p>这些任务没有固定命令序列，每一步都要基于上一步的输出决定下一步查什么——正是体现 Agent Loop 能力的场景</p>
@@ -416,7 +412,7 @@ const HTML = `<!DOCTYPE html>
   </div>
 
   <div class="req-row">
-    <span class="req-icon">🔥</span>
+    <span class="req-icon"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><path d="M9 2v2"/><path d="M15 2v2"/><path d="M9 20v2"/><path d="M15 20v2"/><path d="M2 9h2"/><path d="M2 15h2"/><path d="M20 9h2"/><path d="M20 15h2"/></svg></span>
     <div class="req-text">
       <strong>CPU / 内存占用排查</strong>
       <p>找出当前最占 CPU 或内存的进程，说明它是什么、在做什么、是否需要关注</p>
@@ -424,7 +420,7 @@ const HTML = `<!DOCTYPE html>
   </div>
 
   <div class="req-row">
-    <span class="req-icon">💾</span>
+    <span class="req-icon"><svg viewBox="0 0 24 24"><line x1="22" y1="12" x2="2" y2="12"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/><line x1="6" y1="16" x2="6.01" y2="16"/><line x1="10" y1="16" x2="10.01" y2="16"/></svg></span>
     <div class="req-text">
       <strong>磁盘空间诊断</strong>
       <p>"磁盘快满了" —— 找出最占空间的目录并给出清理建议</p>
@@ -432,7 +428,7 @@ const HTML = `<!DOCTYPE html>
   </div>
 
   <div class="req-row">
-    <span class="req-icon">🌐</span>
+    <span class="req-icon"><svg viewBox="0 0 24 24"><rect x="16" y="16" width="6" height="6" rx="1"/><rect x="2" y="16" width="6" height="6" rx="1"/><rect x="9" y="2" width="6" height="6" rx="1"/><path d="M5 16v-3a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v3"/><path d="M12 12V8"/></svg></span>
     <div class="req-text">
       <strong>端口占用排查</strong>
       <p>查清某个端口被谁占用、对应进程是什么、服务是否健康</p>
@@ -449,7 +445,7 @@ const HTML = `<!DOCTYPE html>
   </div>
 
   <div class="req-row">
-    <span class="req-icon">🔁</span>
+    <span class="req-icon"><svg viewBox="0 0 24 24"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M3 21v-5h5"/></svg></span>
     <div class="req-text">
       <strong>完整的循环</strong>
       <p>LLM 能自主判断是否调用工具、处理工具结果、并持续推理直到给出最终答复</p>
@@ -457,7 +453,7 @@ const HTML = `<!DOCTYPE html>
   </div>
 
   <div class="req-row">
-    <span class="req-icon">🛠️</span>
+    <span class="req-icon"><svg viewBox="0 0 24 24"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg></span>
     <div class="req-text">
       <strong>至少包含 Bash / Shell 工具</strong>
       <p>可在此基础上扩展任意其它工具，数量、形态不限</p>
@@ -465,7 +461,7 @@ const HTML = `<!DOCTYPE html>
   </div>
 
   <div class="req-row">
-    <span class="req-icon">💬</span>
+    <span class="req-icon"><svg viewBox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg></span>
     <div class="req-text">
       <strong>可交互验收</strong>
       <p>能通过网页、CLI、Notebook 等任意界面真实对话体验</p>
@@ -477,42 +473,42 @@ const HTML = `<!DOCTYPE html>
   </div>
 
   <div class="req-row bonus">
-    <span class="req-icon">🧠</span>
+    <span class="req-icon"><svg viewBox="0 0 24 24"><path d="M12 5a3 3 0 1 0-5.997.125 4 4 0 0 0-2.526 5.77 4 4 0 0 0 .556 6.588A4 4 0 1 0 12 21.67"/><path d="M12 5a3 3 0 1 1 5.997.125 4 4 0 0 1 2.526 5.77 4 4 0 0 1-.556 6.588A4 4 0 1 1 12 21.67"/></svg></span>
     <div class="req-text"><strong>Memory</strong> — 跨轮次 / 跨会话的上下文管理</div>
   </div>
 
   <div class="req-row bonus">
-    <span class="req-icon">⚙️</span>
+    <span class="req-icon"><svg viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg></span>
     <div class="req-text"><strong>Skills / Multi-tool</strong> — 多工具协作、工具选择策略</div>
   </div>
 
   <div class="req-row bonus">
-    <span class="req-icon">🧭</span>
+    <span class="req-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88"/></svg></span>
     <div class="req-text"><strong>Planning / Reflection / Robustness</strong> — 规划、反思、错误恢复、并行</div>
   </div>
 
   <div class="req-row bonus">
-    <span class="req-icon">🛡️</span>
+    <span class="req-icon"><svg viewBox="0 0 24 24"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/></svg></span>
     <div class="req-text"><strong>Sandbox</strong> — 工具执行隔离、权限与资源边界</div>
   </div>
 
   <div class="req-row bonus">
-    <span class="req-icon">⚡</span>
+    <span class="req-icon"><svg viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></span>
     <div class="req-text"><strong>Prompt Cache</strong> — 提示词缓存，降低延迟与成本</div>
   </div>
 
   <div class="req-row bonus">
-    <span class="req-icon">🗜️</span>
+    <span class="req-icon"><svg viewBox="0 0 24 24"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg></span>
     <div class="req-text"><strong>Context Engineering</strong> — 长对话压缩、窗口管理、上下文裁剪</div>
   </div>
 
   <div class="req-row bonus">
-    <span class="req-icon">📊</span>
+    <span class="req-icon"><svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></span>
     <div class="req-text"><strong>Observability</strong> — 追踪、日志、Token / 成本统计</div>
   </div>
 
   <div class="req-row bonus">
-    <span class="req-icon">👥</span>
+    <span class="req-icon"><svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>
     <div class="req-text"><strong>Subagents</strong> — 子 agent 分派、多角色协作</div>
   </div>
 
