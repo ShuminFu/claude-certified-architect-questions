@@ -209,6 +209,14 @@ const HTML = `<!DOCTYPE html>
 
   .req-text strong { font-weight: 600; color: var(--text); display: block; margin-bottom: 2px; }
   .req-text p { font-size: 13px; color: var(--text-2); }
+  .req-text p.press {
+    margin-top: 6px;
+    font-size: 12px;
+    color: var(--text-3);
+    border-left: 2px solid var(--accent);
+    padding-left: 8px;
+  }
+  .req-text p.press b { color: var(--text-2); font-weight: 600; }
 
   .bonus-sec-header {
     padding: 12px 24px 12px;
@@ -271,6 +279,12 @@ const HTML = `<!DOCTYPE html>
     stroke-linecap: round;
     stroke-linejoin: round;
   }
+  .bonus-cell.more {
+    background: transparent;
+    border-style: dashed;
+  }
+  .bonus-cell.more svg { stroke: var(--text-3); opacity: .7; }
+  .bonus-cell.more .b-name { color: var(--text-3); font-weight: 500; }
   .bonus-cell .b-name {
     font-size: 11px;
     font-weight: 600;
@@ -289,7 +303,7 @@ const HTML = `<!DOCTYPE html>
 <p class="brand">Claude Code · 动手实践题</p>
 
 <h1>实现一个 Agent Loop</h1>
-<p class="subtitle">基于下图的核心循环，设计并实现你对 Agent Loop 的理解。规模、工具、形态不限，重点是展示你对这一范式的思考与取舍</p>
+<p class="subtitle">核心循环本身很简洁，真正的难点在 harness —— 围绕循环的工程化设计。规模、工具、形态不限，评审重点是你在上下文、工具、执行边界等方面的取舍</p>
 
 <!-- Diagram card -->
 <div class="card">
@@ -367,7 +381,7 @@ const HTML = `<!DOCTYPE html>
   </div>
 
   <!-- Bonus grid -->
-  <div class="bonus-divider">加分方向 · 任选其一深入</div>
+  <div class="bonus-divider">可选切入方向 · 任选其一深入（不限于此）</div>
   <div class="bonus-grid">
     <div class="bonus-cell">
       <svg viewBox="0 0 24 24"><path d="M12 5a3 3 0 1 0-5.997.125 4 4 0 0 0-2.526 5.77 4 4 0 0 0 .556 6.588A4 4 0 1 0 12 21.67"/><path d="M12 5a3 3 0 1 1 5.997.125 4 4 0 0 1 2.526 5.77 4 4 0 0 1-.556 6.588A4 4 0 1 1 12 21.67"/></svg>
@@ -378,8 +392,8 @@ const HTML = `<!DOCTYPE html>
       <span class="b-name">Skills</span>
     </div>
     <div class="bonus-cell">
-      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88"/></svg>
-      <span class="b-name">Planning</span>
+      <svg viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-6.22-8.56"/><polyline points="21 4 12 13 9 10"/></svg>
+      <span class="b-name">Resilience</span>
     </div>
     <div class="bonus-cell">
       <svg viewBox="0 0 24 24"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/></svg>
@@ -401,6 +415,10 @@ const HTML = `<!DOCTYPE html>
       <svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
       <span class="b-name">Subagents</span>
     </div>
+    <div class="bonus-cell more" title="不限于以上方向">
+      <svg viewBox="0 0 24 24"><circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/></svg>
+      <span class="b-name">More…</span>
+    </div>
   </div>
 
 </div>
@@ -409,14 +427,14 @@ const HTML = `<!DOCTYPE html>
 <div class="reqs-card" style="margin-bottom: 16px;">
 
   <div class="sec-header">
-    <span class="sec-header-label">示例任务 · 本机系统诊断</span>
+    <span class="sec-header-label">示例任务 · 本机诊断 · 各自制造 harness 压力点</span>
   </div>
 
   <div class="req-row">
     <span class="req-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg></span>
     <div class="req-text">
-      <strong>让你的 agent 能完成下列任意一个本机诊断任务</strong>
-      <p>这些任务没有固定命令序列，每一步都要基于上一步的输出决定下一步查什么——正是体现 Agent Loop 能力的场景</p>
+      <strong>任选下列任务让你的 agent 完成</strong>
+      <p>任务本身朴素，但每一个都会在 harness 的某个维度上制造压力。请在实现与讲解中清楚呈现：你如何设计 harness 来承受它</p>
     </div>
   </div>
 
@@ -425,14 +443,16 @@ const HTML = `<!DOCTYPE html>
     <div class="req-text">
       <strong>CPU / 内存占用排查</strong>
       <p>找出当前最占 CPU 或内存的进程，说明它是什么、在做什么、是否需要关注</p>
+      <p class="press"><b>压力点</b> · top / ps 输出行数多、噪声大 —— 考察上下文裁剪、输出摘要、多步推理的链路管理</p>
     </div>
   </div>
 
   <div class="req-row">
     <span class="req-icon"><svg viewBox="0 0 24 24"><line x1="22" y1="12" x2="2" y2="12"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/><line x1="6" y1="16" x2="6.01" y2="16"/><line x1="10" y1="16" x2="10.01" y2="16"/></svg></span>
     <div class="req-text">
-      <strong>磁盘空间诊断</strong>
-      <p>"磁盘快满了" —— 找出最占空间的目录并给出清理建议</p>
+      <strong>磁盘空间诊断与清理</strong>
+      <p>"/根分区快满了" —— 定位最占空间的目录，给出清理方案并（在允许范围内）执行</p>
+      <p class="press"><b>压力点</b> · du 可能长时间无输出；清理动作触及 rm —— 考察长耗时工具、执行边界 / sandbox、危险动作的确认机制</p>
     </div>
   </div>
 
@@ -441,6 +461,16 @@ const HTML = `<!DOCTYPE html>
     <div class="req-text">
       <strong>端口占用排查</strong>
       <p>查清某个端口被谁占用、对应进程是什么、服务是否健康</p>
+      <p class="press"><b>压力点</b> · lsof / netstat 输出非结构化、平台差异、可能需要 sudo —— 考察工具组合、权限错误的恢复与兜底</p>
+    </div>
+  </div>
+
+  <div class="req-row">
+    <span class="req-icon"><svg viewBox="0 0 24 24"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></span>
+    <div class="req-text">
+      <strong>偶发问题根因定位</strong>
+      <p>"某服务过去 1 小时内偶发超时 / 502，不稳定复现" —— 让 agent 组合日志、进程、网络信号给出合理假设</p>
+      <p class="press"><b>压力点</b> · 非确定性问题、工具本身可能抖动或超时 —— 直接考察 Resilience（重试、容错）与观测性设计</p>
     </div>
   </div>
 
@@ -477,9 +507,17 @@ const HTML = `<!DOCTYPE html>
     </div>
   </div>
 
+  <div class="req-row">
+    <span class="req-icon"><svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 1 1 3 3L7 19l-4 1 1-4Z"/></svg></span>
+    <div class="req-text">
+      <strong>harness 工程化的深度思考</strong>
+      <p>Agent Loop 本身很简洁，评审的核心是你对 harness 的设计取舍：上下文如何组织、工具如何抽象、错误如何恢复、执行边界如何划定。无论口头讲解还是落到代码，都请清晰呈现</p>
+    </div>
+  </div>
+
   <div class="bonus-sec-header">
-    <span class="sec-header-label">加分项 · 聚焦一个方向深入</span>
-    <p class="bonus-sub">只选一个方向深入，重点呈现你对 harness 的设计思考与取舍</p>
+    <span class="sec-header-label">可选方向 · 任选其一作为切入点</span>
+    <p class="bonus-sub">以下方向非穷尽，都是展示 harness 设计思考的好载体；也欢迎自带你关心的议题</p>
   </div>
 
   <div class="req-row bonus">
@@ -493,8 +531,8 @@ const HTML = `<!DOCTYPE html>
   </div>
 
   <div class="req-row bonus">
-    <span class="req-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88"/></svg></span>
-    <div class="req-text"><strong>Planning / Reflection / Robustness</strong> — 规划、反思、错误恢复、并行</div>
+    <span class="req-icon"><svg viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-6.22-8.56"/><polyline points="21 4 12 13 9 10"/></svg></span>
+    <div class="req-text"><strong>Resilience</strong> — 模型调用重试、loop 错误恢复、工具失败兜底、执行安全边界</div>
   </div>
 
   <div class="req-row bonus">
@@ -520,6 +558,11 @@ const HTML = `<!DOCTYPE html>
   <div class="req-row bonus">
     <span class="req-icon"><svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>
     <div class="req-text"><strong>Subagents</strong> — 子 agent 分派、多角色协作</div>
+  </div>
+
+  <div class="req-row bonus">
+    <span class="req-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg></span>
+    <div class="req-text"><strong>Other</strong> — 以上并非清单，欢迎自带你关注的 harness 议题</div>
   </div>
 
 </div>
