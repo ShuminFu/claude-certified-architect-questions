@@ -211,10 +211,19 @@ const HTML = `<!DOCTYPE html>
   .req-text p { font-size: 13px; color: var(--text-2); }
 
   .bonus-sec-header {
-    padding: 12px 24px 10px;
+    padding: 12px 24px 12px;
     border-bottom: 1px solid var(--border);
     border-top: 1px solid var(--border);
     background: var(--bg);
+  }
+  .bonus-sub {
+    margin: 6px 0 0;
+    font-size: 12.5px;
+    line-height: 1.55;
+    color: var(--text-2);
+    font-weight: 400;
+    letter-spacing: 0;
+    text-transform: none;
   }
 
   /* ── Bonus grid inside diagram card ── */
@@ -358,7 +367,7 @@ const HTML = `<!DOCTYPE html>
   </div>
 
   <!-- Bonus grid -->
-  <div class="bonus-divider">加分方向 · 任选发挥</div>
+  <div class="bonus-divider">加分方向 · 任选其一深入</div>
   <div class="bonus-grid">
     <div class="bonus-cell">
       <svg viewBox="0 0 24 24"><path d="M12 5a3 3 0 1 0-5.997.125 4 4 0 0 0-2.526 5.77 4 4 0 0 0 .556 6.588A4 4 0 1 0 12 21.67"/><path d="M12 5a3 3 0 1 1 5.997.125 4 4 0 0 1 2.526 5.77 4 4 0 0 1-.556 6.588A4 4 0 1 1 12 21.67"/></svg>
@@ -469,7 +478,8 @@ const HTML = `<!DOCTYPE html>
   </div>
 
   <div class="bonus-sec-header">
-    <span class="sec-header-label">加分项 · 任选方向自由发挥</span>
+    <span class="sec-header-label">加分项 · 聚焦一个方向深入</span>
+    <p class="bonus-sub">只选一个方向深入，重点呈现你对 harness 的设计思考与取舍</p>
   </div>
 
   <div class="req-row bonus">
