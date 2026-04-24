@@ -518,15 +518,7 @@ const HTML = `<!DOCTYPE html>
 <div class="reqs-card">
 
   <div class="sec-header">
-    <span class="sec-header-label">参考任务 · 用来试跑你设计的 agent（非指定题目）</span>
-  </div>
-
-  <div class="req-row">
-    <span class="req-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg></span>
-    <div class="req-text">
-      <strong>仅作参考</strong>
-      <p>你的 agent 不必针对它们设计。以下每个任务都会在 harness 的某个维度上制造压力点——可以拿来试跑、验证你的 harness 取舍是否成立</p>
-    </div>
+    <span class="sec-header-label">参考任务</span>
   </div>
 
   <div class="req-row">
