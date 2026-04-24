@@ -423,61 +423,8 @@ const HTML = `<!DOCTYPE html>
 
 </div>
 
-<!-- Example tasks -->
-<div class="reqs-card" style="margin-bottom: 16px;">
-
-  <div class="sec-header">
-    <span class="sec-header-label">示例任务 · 本机诊断 · 各自制造 harness 压力点</span>
-  </div>
-
-  <div class="req-row">
-    <span class="req-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg></span>
-    <div class="req-text">
-      <strong>任选下列任务让你的 agent 完成</strong>
-      <p>任务本身朴素，但每一个都会在 harness 的某个维度上制造压力。请在实现与讲解中清楚呈现：你如何设计 harness 来承受它</p>
-    </div>
-  </div>
-
-  <div class="req-row">
-    <span class="req-icon"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><path d="M9 2v2"/><path d="M15 2v2"/><path d="M9 20v2"/><path d="M15 20v2"/><path d="M2 9h2"/><path d="M2 15h2"/><path d="M20 9h2"/><path d="M20 15h2"/></svg></span>
-    <div class="req-text">
-      <strong>CPU / 内存占用排查</strong>
-      <p>找出当前最占 CPU 或内存的进程，说明它是什么、在做什么、是否需要关注</p>
-      <p class="press"><b>压力点</b> · top / ps 输出行数多、噪声大 —— 考察上下文裁剪、输出摘要、多步推理的链路管理</p>
-    </div>
-  </div>
-
-  <div class="req-row">
-    <span class="req-icon"><svg viewBox="0 0 24 24"><line x1="22" y1="12" x2="2" y2="12"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/><line x1="6" y1="16" x2="6.01" y2="16"/><line x1="10" y1="16" x2="10.01" y2="16"/></svg></span>
-    <div class="req-text">
-      <strong>磁盘空间诊断与清理</strong>
-      <p>"/根分区快满了" —— 定位最占空间的目录，给出清理方案并（在允许范围内）执行</p>
-      <p class="press"><b>压力点</b> · du 可能长时间无输出；清理动作触及 rm —— 考察长耗时工具、执行边界 / sandbox、危险动作的确认机制</p>
-    </div>
-  </div>
-
-  <div class="req-row">
-    <span class="req-icon"><svg viewBox="0 0 24 24"><rect x="16" y="16" width="6" height="6" rx="1"/><rect x="2" y="16" width="6" height="6" rx="1"/><rect x="9" y="2" width="6" height="6" rx="1"/><path d="M5 16v-3a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v3"/><path d="M12 12V8"/></svg></span>
-    <div class="req-text">
-      <strong>端口占用排查</strong>
-      <p>查清某个端口被谁占用、对应进程是什么、服务是否健康</p>
-      <p class="press"><b>压力点</b> · lsof / netstat 输出非结构化、平台差异、可能需要 sudo —— 考察工具组合、权限错误的恢复与兜底</p>
-    </div>
-  </div>
-
-  <div class="req-row">
-    <span class="req-icon"><svg viewBox="0 0 24 24"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></span>
-    <div class="req-text">
-      <strong>偶发问题根因定位</strong>
-      <p>"某服务过去 1 小时内偶发超时 / 502，不稳定复现" —— 让 agent 组合日志、进程、网络信号给出合理假设</p>
-      <p class="press"><b>压力点</b> · 非确定性问题、工具本身可能抖动或超时 —— 直接考察 Resilience（重试、容错）与观测性设计</p>
-    </div>
-  </div>
-
-</div>
-
 <!-- Requirements -->
-<div class="reqs-card">
+<div class="reqs-card" style="margin-bottom: 16px;">
 
   <div class="sec-header">
     <span class="sec-header-label">验收要求</span>
@@ -563,6 +510,59 @@ const HTML = `<!DOCTYPE html>
   <div class="req-row bonus">
     <span class="req-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg></span>
     <div class="req-text"><strong>Other</strong> — 以上并非清单，欢迎自带你关注的 harness 议题</div>
+  </div>
+
+</div>
+
+<!-- Reference tasks -->
+<div class="reqs-card">
+
+  <div class="sec-header">
+    <span class="sec-header-label">参考任务 · 用来试跑你设计的 agent（非指定题目）</span>
+  </div>
+
+  <div class="req-row">
+    <span class="req-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg></span>
+    <div class="req-text">
+      <strong>仅作参考</strong>
+      <p>你的 agent 不必针对它们设计。以下每个任务都会在 harness 的某个维度上制造压力点——可以拿来试跑、验证你的 harness 取舍是否成立</p>
+    </div>
+  </div>
+
+  <div class="req-row">
+    <span class="req-icon"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><path d="M9 2v2"/><path d="M15 2v2"/><path d="M9 20v2"/><path d="M15 20v2"/><path d="M2 9h2"/><path d="M2 15h2"/><path d="M20 9h2"/><path d="M20 15h2"/></svg></span>
+    <div class="req-text">
+      <strong>CPU / 内存占用排查</strong>
+      <p>找出当前最占 CPU 或内存的进程，说明它是什么、在做什么、是否需要关注</p>
+      <p class="press"><b>压力点</b> · top / ps 输出行数多、噪声大 —— 考察上下文裁剪、输出摘要、多步推理的链路管理</p>
+    </div>
+  </div>
+
+  <div class="req-row">
+    <span class="req-icon"><svg viewBox="0 0 24 24"><line x1="22" y1="12" x2="2" y2="12"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/><line x1="6" y1="16" x2="6.01" y2="16"/><line x1="10" y1="16" x2="10.01" y2="16"/></svg></span>
+    <div class="req-text">
+      <strong>磁盘空间诊断与清理</strong>
+      <p>"/根分区快满了" —— 定位最占空间的目录，给出清理方案并（在允许范围内）执行</p>
+      <p class="press"><b>压力点</b> · du 可能长时间无输出；清理动作触及 rm —— 考察长耗时工具、执行边界 / sandbox、危险动作的确认机制</p>
+    </div>
+  </div>
+
+  <div class="req-row">
+    <span class="req-icon"><svg viewBox="0 0 24 24"><rect x="16" y="16" width="6" height="6" rx="1"/><rect x="2" y="16" width="6" height="6" rx="1"/><rect x="9" y="2" width="6" height="6" rx="1"/><path d="M5 16v-3a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v3"/><path d="M12 12V8"/></svg></span>
+    <div class="req-text">
+      <strong>端口占用排查</strong>
+      <p>查清某个端口被谁占用、对应进程是什么、服务是否健康</p>
+      <p class="press"><b>压力点</b> · lsof / netstat 输出非结构化、平台差异、可能需要 sudo —— 考察工具组合、权限错误的恢复与兜底</p>
+    </div>
+  </div>
+
+  <div class="req-row">
+    <span class="req-icon"><svg viewBox="0 0 24 24"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></span>
+    <div class="req-text">
+      <strong>偶发问题根因定位</strong>
+      <p>"某服务过去 1 小时内偶发超时 / 502，不稳定复现" —— 让 agent 组合日志、进程、网络信号给出合理假设</p>
+      <p class="press"><b>压力点</b> · 非确定性问题、工具本身可能抖动或超时 —— 直接考察 Resilience（重试、容错）与观测性设计</p>
+    </div>
   </div>
 
 </div>
